@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+input[type=text] {
+    width: 400px;
+    box-sizing: border-box;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    background-color: white;
+    background-image: url('searchicon.png');
+    background-position: 10px 10px;
+    background-repeat: no-repeat;
+    padding: 12px 20px 12px 40px;
+    -webkit-transition: width 0.4s ease-in-out;
+    transition: width 0.4s ease-in-out;
+}
+
+input[type=text]:focus {
+    width: 100%;
+}
+</style>
+</head>
+<body>
+
+<p>Animated search form:</p>
+
+<form method="POST" action="/">
+  <input type="text" name="search" placeholder="Ingredients (separated by commas)">
+</form>
+
+<form method="POST" action="/recipe">
+  <input type="text" name="search" placeholder="recipes (separated by commas)">
+</form>
+
+<form method="POST" action="/chef">
+  <input type="text" name="search" placeholder="chef (separated by commas)">
+</form>
+
+</body>
+</html>
