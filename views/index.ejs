@@ -26,7 +26,7 @@ input[type=text]:focus {
 
 <p>Animated search form:</p>
 
-<form method="POST" action="/">
+<form method="POST" action="/ingredients">
   <input type="text" name="search" placeholder="Ingredients (separated by commas)">
 </form>
 
@@ -34,8 +34,16 @@ input[type=text]:focus {
   <input type="text" name="search" placeholder="recipes (separated by commas)">
 </form>
 
+<form method="POST" action="/recipe_search">
+  <input type="text" name="search" placeholder="recipes search">
+</form>
+
 <form method="POST" action="/chef">
   <input type="text" name="search" placeholder="chef (separated by commas)">
+</form>
+
+<form method="POST" action="/user">
+  <input type="text" name="search" placeholder="user (separated by commas)">
 </form>
 
 </body>

@@ -156,23 +156,23 @@ exports.seed = function(knex, Promise) {
           }
           return Promise.all(orderArr);
         })
-        // .then(() => {
-        //   let orderRecipesArr = [];
-        //   counter = 0;
-        //   for (i = 0; i < 50; i++) {
-        //     for (j = 0; j < 2; j++) {
-        //       orderRecipesArr.push(
-        //         knex('order_recipes').insert([{
-        //           ratingRecipe: Math.round(Math.random()*5),
-        //           comment: randomWords({ min: 1, max: 20 }).join(" "),
-        //           orderID: i + 1,
-        //           recipeID: counter % 45 + 1,
-        //       }])
-        //       )
-        //       counter += 1
-        //     }
-        //   }
-        //   return Promise.all(orderRecipesArr);
-        // })
+        .then(() => {
+          let orderRecipesArr = [];
+          counter = 0;
+          for (i = 0; i < 50; i++) {
+            for (j = 0; j < 2; j++) {
+              orderRecipesArr.push(
+                knex('order_recipes').insert([{
+                  ratingRecipe: Math.round(Math.random()*5),
+                  comment: randomWords({ min: 1, max: 20 }).join(" "),
+                  orderID: i + 1,
+                  recipeID: counter % 45 + 1,
+              }])
+              )
+              counter += 1
+            }
+          }
+          return Promise.all(orderRecipesArr);
+        })
         .catch((err) => console.error(err));
 };
