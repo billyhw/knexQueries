@@ -20,6 +20,7 @@ exports.up = function(knex, Promise) {
             table.string('password').notNullable();
             table.string('imageUrl');
             table.string('address').notNullable();
+            table.string('stripeToken');
             table.bigInteger('phoneNumber').notNullable();
             table.timestamp('createdAt').defaultTo(knex.fn.now());
             table.timestamp('updatedAt').defaultTo(knex.fn.now());;
@@ -63,7 +64,9 @@ exports.up = function(knex, Promise) {
         return knex.schema.createTable('recipes', function (table) {
             table.increments('id');
             table.string('name').notNullable();
-            table.integer('cookingTimeInMinutes').notNullable();
+            table.integer('cookingTimeInMinutes');
+            table.integer('preparationTimeInMinutes');
+            table.integer('readyTimeInMinutes').notNullable();
             table.string('imageUrl').notNullable();
             table.string('cuisine').notNullable();
             table.string('cookingSteps');

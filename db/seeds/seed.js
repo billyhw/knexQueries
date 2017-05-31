@@ -32,7 +32,9 @@ exports.seed = function(knex, Promise) {
               knex('recipes').insert([{ id: i+1,
               name: recipeObj[i].title,
               imageUrl: recipeObj[i].image,
-              cookingTimeInMinutes: recipeObj[i].readyInMinutes,
+              cookingTimeInMinutes: recipeObj[i].cookingMinutes,
+              preparationTimeInMinutes: recipeObj[i].preparationMinutes,
+              readyTimeInMinutes: recipeObj[i].readyInMinutes,
               cuisine: recipeObj[i].cuisines.length > 0 ? recipeObj[i].cuisines[recipeObj[i].cuisines.length-1] : "not available from API",
               cookingSteps: recipeObj[i].instructions.slice(0,255)
               }]))
@@ -91,7 +93,8 @@ exports.seed = function(knex, Promise) {
                 firstName: randomName({random: Math.random, first: true}),
                 lastName: randomName({random: Math.random, last: true}),
                 phoneNumber: Math.round(Math.random()*1e10),
-                address: randomWords({ min: 4, max: 6 }).join(" ")
+                address: randomWords({ min: 4, max: 6 }).join(" "),
+                stripeToken: null
             }
             obj.email = obj.firstName + obj.lastName + '@gmail.com';
             obj.password = obj.firstName + obj.lastName;
@@ -118,6 +121,46 @@ exports.seed = function(knex, Promise) {
             }
           }
           return Promise.all(recipe_ingredientsArr);
+        })
+        .then(() => {
+          let recipe_intolerancesArr = [];
+          for (i = 0; i < recipeObj.length; i++) {
+            if (recipeObj[i].glutenFree) {
+              recipe_intolerancesArr.push(
+                knex('recipe_intolerances').insert([{
+                recipeID: knex.select("id").from("recipes").where("name",recipeObj[i].title),
+                intolerance: "glutenFree",
+              }])
+              )}
+            if (recipeObj[i].dairyFree) {
+              recipe_intolerancesArr.push(
+                knex('recipe_intolerances').insert([{
+                recipeID: knex.select("id").from("recipes").where("name",recipeObj[i].title),
+                intolerance: "dairyFree",
+              }])
+              )}
+            }
+          return Promise.all(recipe_intolerancesArr);
+        })
+        .then(() => {
+          let recipe_dietaryRestrictionsArr = [];
+          for (i = 0; i < recipeObj.length; i++) {
+            if (recipeObj[i].vegetarian) {
+              recipe_dietaryRestrictionsArr.push(
+                knex('recipe_dietaryrestrictions').insert([{
+                recipeID: knex.select("id").from("recipes").where("name",recipeObj[i].title),
+                dietaryRestriction: "vegetarian",
+              }])
+              )}
+            if (recipeObj[i].vegan) {
+              recipe_dietaryRestrictionsArr.push(
+                knex('recipe_dietaryrestrictions').insert([{
+                recipeID: knex.select("id").from("recipes").where("name",recipeObj[i].title),
+                dietaryRestriction: "vegan",
+              }])
+              )}
+            }
+          return Promise.all(recipe_dietaryRestrictionsArr);
         })
         .then(() => {
           let chef_recipesArr = [];

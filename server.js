@@ -23,7 +23,7 @@ app.get("/", (req, res) => {
     res.render("index");
   });
 
-app.post("/ingredients", (req, res) => {
+app.post("/searchRecipesByIngredients", (req, res) => {
   // select count(name) as count, name from recipes join recipe_ingredients on (id = "recipeID") where "ingredientID" IN (1 , 2, 3, 4, 5) group by "id" having count >= 3;
   let query = req.body.search.split(',').map((x) => { return x.trim(); });
   console.log(query)
@@ -37,23 +37,35 @@ app.post("/ingredients", (req, res) => {
     })
     .then((result) => {
       console.log("result:", result)
-      knex
+      let a = knex
         .count("name")
-        .select("name")
+        .select("name", "id")
         .from("recipes")
         .join("recipe_ingredients", 'id', 'recipeID')
         .whereIn("ingredientID", result)
-        .groupBy("name")
-        .having(knex.raw("count(name)"), "=", result.length)
-        .then((result) => {
-          console.log("res:", res)
-          res.send(`<html><body> ${JSON.stringify(result)} </body></html>`);
-        })
-      })
+        .groupBy("name", "id");
+      let b = knex
+        .count("name")
+        .select("name", "id")
+        .from("recipes")
+        .join("recipe_ingredients", 'id', 'recipeID')
+        .groupBy("name", "id");
+      return Promise.all([ a , b ]);
+          }).then((result) => {
+            console.log(result[0]);
+            console.log(result[1]);
+            uniqueRecipe = result[0].map((x) => { return x.name });
+            allUniqueRecipe = result[1].map((x) => { return x.name });
+            for (i = 0; i < result[0].length; i++) {
+              currRecipe = uniqueRecipe[i]
+              result[0][uniqueRecipe.indexOf(currRecipe)].numMissingIngredients = result[1][allUniqueRecipe.indexOf(currRecipe)].count - query.length
+            }
+            res.send(`<html><body> ${JSON.stringify(result)} </body></html>`);
+          })
       .catch((err) => { console.error(err); });
 });
 
-app.post("/recipe", (req, res) => {
+app.post("/searchChefsByRecipes", (req, res) => {
   // select count(name) as count, name from recipes join recipe_ingredients on (id = "recipeID") where "ingredientID" IN (1 , 2, 3, 4, 5) group by "id" having count >= 3;
     let query = req.body.search.split(',');
     console.log(query)
@@ -100,7 +112,7 @@ app.post("/recipe", (req, res) => {
 //     .catch((err) => { console.error(err); });
 // });
 
-app.post("/recipe_search", (req, res) => {
+app.post("/searchRecipeByRecipeName", (req, res) => {
   let query = req.body.search;
   query = query.split(" ").filter((x) => { return x !== ""; }).join(" ");
   console.log(query);
@@ -122,10 +134,10 @@ app.post("/recipe_search", (req, res) => {
         .where("recipes.name", "~*", `.*${query}.*`)
         .then((result) => {
           let recipesArr = resultObj.map((x) => { return x.recipeName; });
-          for (i = 0; i < resultObj.length; i++) {
+          for (let i = 0; i < resultObj.length; i++) {
             resultObj[i].ingredients = [];
           }
-          for (i = 0; i < result.length; i++ ) {
+          for (let i = 0; i < result.length; i++ ) {
             resultObj[recipesArr.indexOf(result[i].recipeName)].ingredients.push(result[i].ingredientName)
           }
           console.log("users result:",result);
@@ -202,7 +214,7 @@ app.post("/user", (req, res) => {
       })
       .then(() => {
         knex
-          .select("orders.id as orderID", "orders.orderTotal", "chefs.firstName as chefFirstName", "chefs.lastName as chefLastName", "recipes.name as recipeName" )
+          .select("orders.id as orderID", "orders.orderTotal", "chefs.firstName as chefFirstName", "chefs.lastName as chefLastName", "orders.beginningDateTime", "orders.endingDateTime", "recipes.name as recipeName" )
           .from("users")
           .join("orders", "users.id", "orders.userID")
           .join("chefs", "orders.chefID", "chefs.id")
@@ -210,7 +222,17 @@ app.post("/user", (req, res) => {
           .join("recipes", "order_recipes.recipeID", "recipes.id")
           .whereIn("users.email", query)
           .then((result) => {
-            resultObj.orderHistory = result;
+            let orderArr = [];
+            for (let i = 0; i < result.length; i++) {
+              if (orderArr.map((x) => { return x.orderID }).indexOf(result[i].orderID) === -1 ) {
+                let obj = result[i];
+                obj.recipeName = [obj.recipeName];
+                orderArr.push(obj);
+              } else {
+                orderArr[orderArr.length-1].recipeName.push(result[i].recipeName);
+              }
+            }
+            resultObj.orderHistory = orderArr;
             console.log("users result:",resultObj);
             res.send(`<html><body> ${JSON.stringify(resultObj)} </body></html>`);
           })
