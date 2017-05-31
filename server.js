@@ -27,13 +27,33 @@ app.post("/searchRecipesByIngredients", (req, res) => {
   // select count(name) as count, name from recipes join recipe_ingredients on (id = "recipeID") where "ingredientID" IN (1 , 2, 3, 4, 5) group by "id" having count >= 3;
   let query = req.body.search.split(',').map((x) => { return x.trim(); });
   console.log(query)
-  knex
-    .select("id")
-    .from("ingredients")
-    .whereIn("name", query)
+    knex
+      .select("id")
+      .from("recipes")
+      .whereIn("name", query)
+    .then(() => {
+  arr = [];
+  for (let i = 0; i < query.length; i++) {
+    arr.push(
+      knex
+      .select("id")
+      .from("ingredients")
+      .where("name", "~*", `.*${query[i]}.*`)
+      )
+    }
+    return Promise.all(arr)
+  })
     .then((result) => {
-      return result.map(x => {return x.id});
-      // console.log("query:",result)
+      idArr = [].concat.apply([],result);
+      idArr = idArr.map((x) => { return x.id; });
+      uniqueID = [];
+      idArr.map( (x) => {
+        if (uniqueID.indexOf(x) === -1) {
+          uniqueID.push(x);
+        }
+      })
+      console.log(idArr)
+      return idArr
     })
     .then((result) => {
       console.log("result:", result)
@@ -60,7 +80,7 @@ app.post("/searchRecipesByIngredients", (req, res) => {
               currRecipe = uniqueRecipe[i]
               result[0][uniqueRecipe.indexOf(currRecipe)].numMissingIngredients = result[1][allUniqueRecipe.indexOf(currRecipe)].count - query.length
             }
-            res.send(`<html><body> ${JSON.stringify(result)} </body></html>`);
+            res.send(`<html><body> ${JSON.stringify(result[0].sort(function(a, b) { return a.numMissingIngredients - b.numMissingIngredients; }))} </body></html>`);
           })
       .catch((err) => { console.error(err); });
 });
