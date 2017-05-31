@@ -83,41 +83,57 @@ app.post("/recipe", (req, res) => {
         .catch((err) => { console.error(err); });
   });
 
-app.post("/recipe_search", (req, res) => {
-  let query = req.body.search;
-  query = query.split(" ").filter((x) => { return x !== ""; }).join(" ");
-  console.log(query);
-  knex
-    .select("recipes.name as recipeName", "recipes.imageUrl", "recipes.cuisine", "recipes.cookingTimeInMinutes", "ingredients.name as ingredientName")
-    .from("recipes")
-    .join("recipe_ingredients", "recipes.id", "recipe_ingredients.recipeID")
-    .join("ingredients", "ingredients.id", "recipe_ingredients.ingredientID")
-    .where("recipes.name", "~*", `.*${query}.*`)
-    .then((result) => {
-      // console.log("recipe search result:",result)
-      res.send(`<html><body> ${JSON.stringify(result)} </body></html>`);
-    })
-    .catch((err) => { console.error(err); });
-});
-
-// app.post("/recipe", (req, res) => {
+// app.post("/recipe_search", (req, res) => {
 //   let query = req.body.search;
+//   query = query.split(" ").filter((x) => { return x !== ""; }).join(" ");
 //   console.log(query);
 //   knex
 //     .select("recipes.name as recipeName", "recipes.imageUrl", "recipes.cuisine", "recipes.cookingTimeInMinutes", "ingredients.name as ingredientName")
 //     .from("recipes")
 //     .join("recipe_ingredients", "recipes.id", "recipe_ingredients.recipeID")
 //     .join("ingredients", "ingredients.id", "recipe_ingredients.ingredientID")
-//     .where("recipes.name", query)
+//     .where("recipes.name", "~*", `.*${query}.*`)
 //     .then((result) => {
-//       console.log("recipe search result:", result)
+//       // console.log("recipe search result:",result)
 //       res.send(`<html><body> ${JSON.stringify(result)} </body></html>`);
-//     })
-//     .then(() => {
-
 //     })
 //     .catch((err) => { console.error(err); });
 // });
+
+app.post("/recipe_search", (req, res) => {
+  let query = req.body.search;
+  query = query.split(" ").filter((x) => { return x !== ""; }).join(" ");
+  console.log(query);
+  let resultObj = {};
+  knex
+    .select("recipes.name as recipeName", "recipes.imageUrl", "recipes.cuisine", "recipes.cookingTimeInMinutes")
+    .from("recipes")
+    .where("recipes.name", "~*", `.*${query}.*`)
+    .then((result) => {
+        resultObj = result;
+        console.log("users result:",resultObj)
+    })
+    .then(() => {
+      knex
+        .select("recipes.name as recipeName", "ingredients.name as ingredientName")
+        .from("recipes")
+        .join("recipe_ingredients", "recipes.id", "recipe_ingredients.recipeID")
+        .join("ingredients", "ingredients.id", "recipe_ingredients.ingredientID")
+        .where("recipes.name", "~*", `.*${query}.*`)
+        .then((result) => {
+          let recipesArr = resultObj.map((x) => { return x.recipeName; });
+          for (i = 0; i < resultObj.length; i++) {
+            resultObj[i].ingredients = [];
+          }
+          for (i = 0; i < result.length; i++ ) {
+            resultObj[recipesArr.indexOf(result[i].recipeName)].ingredients.push(result[i].ingredientName)
+          }
+          console.log("users result:",result);
+          res.send(`<html><body> ${JSON.stringify(resultObj)} </body></html>`);
+      })
+    })
+    .catch((err) => { console.error(err); });
+});
 
 // app.post("/chef", (req, res) => {
 //   // select count(name) as count, name from recipes join recipe_ingredients on (id = "recipeID") where "ingredientID" IN (1 , 2, 3, 4, 5) group by "id" having count >= 3;
