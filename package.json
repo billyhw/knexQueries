@@ -9,6 +9,7 @@
     "express": "^4.15.3",
     "knex": "^0.13.0",
     "knex-logger": "^0.1.0",
+    "lorem-ipsum": "^1.0.4",
     "node-random-name": "^1.0.1",
     "pg": "^6.2.3",
     "random-words": "0.0.1",

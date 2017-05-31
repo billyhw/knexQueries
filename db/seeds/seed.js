@@ -2,6 +2,7 @@ const fs = require('fs');
 const knex = require('knex');
 const randomName = require('node-random-name');
 const randomWords = require('random-words');
+const loremIpsum = require('lorem-ipsum')
 let recipeObj;
 
 fs.readFile('./jsonfile.json', 'utf8', function readFileCallBack(err, data) {
@@ -71,7 +72,8 @@ exports.seed = function(knex, Promise) {
             let obj = { id: i+1,
                 firstName: randomName({random: Math.random, first: true}),
                 lastName: randomName({random: Math.random, last: true}),
-                description: randomWords({ min: 10, max: 30 }).join(" "),
+                // description: randomWords({ min: 10, max: 30 }).join(" "),
+                description: loremIpsum({ count: 1, units: 'sentences' }),
                 phoneNumber: Math.round(Math.random()*1e10),
                 hourlyRateInCents: Math.round(Math.random()*1e4)
             }
@@ -93,7 +95,7 @@ exports.seed = function(knex, Promise) {
                 firstName: randomName({random: Math.random, first: true}),
                 lastName: randomName({random: Math.random, last: true}),
                 phoneNumber: Math.round(Math.random()*1e10),
-                address: randomWords({ min: 4, max: 6 }).join(" "),
+                address: loremIpsum({ count: 1, units: 'sentences' }),
                 stripeToken: null
             }
             obj.email = obj.firstName + obj.lastName + '@gmail.com';
@@ -188,7 +190,7 @@ exports.seed = function(knex, Promise) {
                   beginningDateTime: knex.fn.now(),
                   endingDateTime: knex.fn.now(),
                   ratingOrder: Math.round(Math.random()*5),
-                  comment: randomWords({ min: 1, max: 20 }).join(" "),
+                  comment: loremIpsum({ count: 1, units: 'sentences' }),
                   userID: i + 1,
                   chefID: counter % 50 + 1,
                   orderTotal: Math.round(Math.random()*1e4),
@@ -207,7 +209,7 @@ exports.seed = function(knex, Promise) {
               orderRecipesArr.push(
                 knex('order_recipes').insert([{
                   ratingRecipe: Math.round(Math.random()*5),
-                  comment: randomWords({ min: 1, max: 20 }).join(" "),
+                  comment: loremIpsum({ count: 1, units: 'sentences' }),
                   orderID: i + 1,
                   recipeID: counter % 45 + 1,
               }])

@@ -80,7 +80,25 @@ app.post("/searchRecipesByIngredients", (req, res) => {
               currRecipe = uniqueRecipe[i]
               result[0][uniqueRecipe.indexOf(currRecipe)].numMissingIngredients = result[1][allUniqueRecipe.indexOf(currRecipe)].count - query.length
             }
-            res.send(`<html><body> ${JSON.stringify(result[0].sort(function(a, b) { return a.numMissingIngredients - b.numMissingIngredients; }))} </body></html>`);
+            let sortFunc = function(a, b) {
+              if (a.count > b.count) {
+                return -1;
+              }
+              if (a.count < b.count) {
+                return 1;
+              }
+              if (a.count === b.count) {
+                if (a.numMissingIngredients > b.numMissingIngredients) {
+                  return 1;
+                }
+                if (a.numMissingIngredients < b.numMissingIngredients) {
+                  return -1;
+                }
+              }
+              return 0;
+            }
+
+            res.send(`<html><body> ${JSON.stringify(result[0].sort(sortFunc))} </body></html>`);
           })
       .catch((err) => { console.error(err); });
 });
